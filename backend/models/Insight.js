@@ -15,6 +15,7 @@ const insightSchema = new mongoose.Schema(
     end_year: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     intensity: {
@@ -25,45 +26,55 @@ const insightSchema = new mongoose.Schema(
     sector: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     topic: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     insight: {
       type: String,
       default: '',
+      trim: true,
     },
     url: {
       type: String,
       default: '',
+      trim: true,
     },
     region: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     start_year: {
       type: String,
       default: '',
+      trim: true,
     },
     impact: {
       type: String,
       default: '',
+      trim: true,
     },
     added: {
       type: String,
       default: '',
+      trim: true,
     },
     published: {
       type: String,
       default: '',
+      trim: true,
     },
     country: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     relevance: {
@@ -74,16 +85,19 @@ const insightSchema = new mongoose.Schema(
     pestle: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     source: {
       type: String,
       default: '',
+      trim: true,
       index: true,
     },
     title: {
       type: String,
       default: '',
+      trim: true,
     },
     likelihood: {
       type: Number,
@@ -95,12 +109,14 @@ const insightSchema = new mongoose.Schema(
     city: {
       type: String,
       default: '',
+      trim: true,
     },
     // Forward-compatibility: swot is not populated in the initial ~1000 dataset,
     // but included in schema for prospective strategic analysis categorization.
     swot: {
       type: String,
       default: '',
+      trim: true,
     },
   },
   {

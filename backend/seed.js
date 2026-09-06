@@ -17,10 +17,24 @@ const seedData = async () => {
     const records = JSON.parse(rawData);
     console.log(`Read ${records.length} records from ${dataPath}`);
 
+    // Data hygiene normalization: strip whitespace across all string fields and normalize casing inconsistencies (e.g., "world" -> "World") in source records
+    const cleanedRecords = records.map((record) => {
+      const cleaned = {};
+      for (const [key, value] of Object.entries(record)) {
+        cleaned[key] = typeof value === 'string' ? value.trim() : value;
+      }
+      if (cleaned.region && cleaned.region.toLowerCase() === 'world') {
+        cleaned.region = 'World';
+      }
+      return cleaned;
+    });
+
+    // Idempotent seeding: clear existing collection before inserting
     const deleteResult = await Insight.deleteMany({});
     console.log(`Cleared existing records (deleted: ${deleteResult.deletedCount || 0}).`);
 
-    const inserted = await Insight.insertMany(records);
+    // Insert normalized records
+    const inserted = await Insight.insertMany(cleanedRecords);
     console.log(`Successfully inserted ${inserted.length} records into the database.`);
 
     await mongoose.connection.close();
@@ -31,6 +45,7 @@ const seedData = async () => {
     try {
       await mongoose.connection.close();
     } catch (closeErr) {
+      // ignore secondary error on connection close
     }
     process.exit(1);
   }
