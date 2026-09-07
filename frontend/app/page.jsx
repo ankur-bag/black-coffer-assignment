@@ -5,7 +5,12 @@ import { getFilters, getStats } from '../lib/api';
 import { useDashboardFilters } from '../hooks/useDashboardFilters';
 import DashboardHeader from '../components/DashboardHeader';
 import FiltersPreview from '../components/FiltersPreview';
-import StatsPreview from '../components/StatsPreview';
+import KpiCards from '../components/KpiCards';
+import SectorBarChart from '../components/SectorBarChart';
+import RegionDonutChart from '../components/RegionDonutChart';
+import YearLineChart from '../components/YearLineChart';
+import TopTopicsChart from '../components/TopTopicsChart';
+import ChartSkeleton from '../components/ChartSkeleton';
 
 /**
  * Main dashboard container component (Data & Orchestration Layer).
@@ -76,28 +81,80 @@ export default function DashboardPage() {
     };
   }, [filters]);
 
+  const isEmpty = stats && stats.matchedCount === 0;
+
   return (
     <main className="w-full max-w-[var(--max-width-container)] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* 1. Page Header */}
       <DashboardHeader
         matchedCount={stats?.matchedCount ?? 0}
         loading={loadingStats}
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-        <FiltersPreview
-          options={filterOptions}
-          filters={filters}
-          setFilter={setFilter}
-          resetFilters={resetFilters}
-          loading={loadingFilters}
-        />
+      {/* 2. Interactive Filter Bar */}
+      <FiltersPreview
+        options={filterOptions}
+        filters={filters}
+        setFilter={setFilter}
+        resetFilters={resetFilters}
+        loading={loadingFilters}
+      />
 
-        <StatsPreview
-          stats={stats}
-          loading={loadingStats}
-          error={error}
-        />
-      </div>
+      {/* Error alert if API fails */}
+      {error && (
+        <div className="mb-6 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+          <strong>Pipeline Error:</strong> {error}
+        </div>
+      )}
+
+      {/* 3. Executive KPI Indicators */}
+      <KpiCards
+        matchedCount={stats?.matchedCount ?? 0}
+        avgIntensity={stats?.avgIntensity ?? 0}
+        avgLikelihood={stats?.avgLikelihood ?? 0}
+        avgRelevance={stats?.avgRelevance ?? 0}
+        loading={loadingStats}
+      />
+
+      {/* 4. Visualizations Grid or Empty State */}
+      {isEmpty ? (
+        <section className="p-12 text-center bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg shadow-xs my-8">
+          <div className="w-12 h-12 rounded-full bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] mx-auto flex items-center justify-center mb-3 text-lg">
+            🔍
+          </div>
+          <h2 className="text-base font-semibold text-[var(--color-text-primary)]">
+            No records match these filters
+          </h2>
+          <p className="text-xs text-[var(--color-text-secondary)] mt-1 max-w-sm mx-auto">
+            No telemetry records satisfied the active combination of dimensions. Try resetting or loosening your selection.
+          </p>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mt-4 px-4 py-2 text-xs font-semibold rounded-md bg-[var(--color-accent)] text-white hover:bg-[var(--color-accent-hover)] cursor-pointer transition-colors shadow-xs"
+          >
+            Reset All Filters
+          </button>
+        </section>
+      ) : (
+        <section aria-label="Visualizations" className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          {loadingStats && !stats ? (
+            <>
+              <ChartSkeleton title="Sector Intensity" />
+              <ChartSkeleton title="Geographic Distribution" />
+              <ChartSkeleton title="Temporal Trends" />
+              <ChartSkeleton title="Top Topics" />
+            </>
+          ) : (
+            <>
+              <SectorBarChart data={stats?.intensityBySector || []} />
+              <RegionDonutChart data={stats?.countByRegion || []} />
+              <YearLineChart data={stats?.metricsByYear || []} />
+              <TopTopicsChart data={stats?.topTopics || []} />
+            </>
+          )}
+        </section>
+      )}
     </main>
   );
 }

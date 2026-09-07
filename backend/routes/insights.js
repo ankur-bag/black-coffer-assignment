@@ -154,10 +154,20 @@ router.get('/stats', async (req, res) => {
             },
           ],
           countByRegion: [
-            { $match: { region: { $ne: '' } } },
+            {
+              $addFields: {
+                regionName: {
+                  $cond: [
+                    { $or: [{ $eq: ['$region', ''] }, { $eq: ['$region', null] }] },
+                    'Unspecified',
+                    '$region',
+                  ],
+                },
+              },
+            },
             {
               $group: {
-                _id: '$region',
+                _id: '$regionName',
                 count: { $sum: 1 },
               },
             },
@@ -212,10 +222,20 @@ router.get('/stats', async (req, res) => {
             { $project: { sortOrder: 0 } },
           ],
           topTopics: [
-            { $match: { topic: { $ne: '' } } },
+            {
+              $addFields: {
+                topicName: {
+                  $cond: [
+                    { $or: [{ $eq: ['$topic', ''] }, { $eq: ['$topic', null] }] },
+                    'Unspecified',
+                    '$topic',
+                  ],
+                },
+              },
+            },
             {
               $group: {
-                _id: '$topic',
+                _id: '$topicName',
                 count: { $sum: 1 },
               },
             },
