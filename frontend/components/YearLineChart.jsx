@@ -16,7 +16,7 @@ import {
   Legend,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { ACCENT_PRIMARY, ACCENT_SECONDARY } from '../lib/chartColors';
+import { ACCENT_SECONDARY, ACCENT_TERTIARY } from '../lib/chartColors';
 
 ChartJS.register(
   CategoryScale,
@@ -42,8 +42,8 @@ export default function YearLineChart({ data = [] }) {
       {
         label: 'Avg Relevance',
         data: relevanceValues,
-        borderColor: ACCENT_PRIMARY,
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+        borderColor: ACCENT_TERTIARY,
+        backgroundColor: 'rgba(13, 148, 136, 0.1)',
         tension: 0.3,
         pointRadius: 3,
         pointHoverRadius: 6,
