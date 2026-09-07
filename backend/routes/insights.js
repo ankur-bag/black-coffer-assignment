@@ -249,7 +249,16 @@ router.get('/stats', async (req, res) => {
               },
             },
           ],
+          // Data honesty: exclude ~38 records with missing source scores (coerced to 0) from the bubble chart
+          // specifically, since plotting a coerced 0 as a real coordinate would misrepresent missing data as a genuine low score.
           bubblePoints: [
+            {
+              $match: {
+                intensity: { $gt: 0 },
+                likelihood: { $gt: 0 },
+                relevance: { $gt: 0 },
+              },
+            },
             { $sample: { size: 500 } },
             {
               $project: {
