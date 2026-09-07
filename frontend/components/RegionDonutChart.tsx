@@ -8,6 +8,8 @@ import {
   Legend,
   ChartOptions,
   TooltipItem,
+  ChartEvent,
+  ActiveElement,
 } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { RegionStat } from '../lib/types';
@@ -17,9 +19,13 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 export interface RegionDonutChartProps {
   data?: RegionStat[];
+  onSegmentClick?: (region: string) => void;
 }
 
-export default function RegionDonutChart({ data = [] }: RegionDonutChartProps): React.JSX.Element {
+export default function RegionDonutChart({
+  data = [],
+  onSegmentClick,
+}: RegionDonutChartProps): React.JSX.Element {
   const top10 = data.slice(0, 10);
   const remainder = data.slice(10);
   const otherCount = remainder.reduce((acc, curr) => acc + curr.count, 0);
@@ -51,6 +57,21 @@ export default function RegionDonutChart({ data = [] }: RegionDonutChartProps): 
   const chartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
+      if (!onSegmentClick || elements.length === 0) return;
+      const index = elements[0].index;
+      const clickedRegion = slices[index]?.region;
+      if (clickedRegion && clickedRegion !== 'Other') {
+        onSegmentClick(clickedRegion);
+      }
+    },
+    onHover: (event: ChartEvent, chartElement: ActiveElement[]) => {
+      const nativeEvent = event.native;
+      if (nativeEvent && nativeEvent.target) {
+        (nativeEvent.target as HTMLElement).style.cursor =
+          chartElement.length > 0 && onSegmentClick ? 'pointer' : 'default';
+      }
+    },
     plugins: {
       legend: {
         position: 'right',

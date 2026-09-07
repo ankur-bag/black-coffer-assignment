@@ -10,6 +10,8 @@ import {
   Legend,
   ChartOptions,
   TooltipItem,
+  ChartEvent,
+  ActiveElement,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { SectorStat } from '../lib/types';
@@ -28,7 +30,10 @@ export interface SectorBarChartProps {
   onSegmentClick?: (sector: string) => void;
 }
 
-export default function SectorBarChart({ data = [] }: SectorBarChartProps): React.JSX.Element {
+export default function SectorBarChart({
+  data = [],
+  onSegmentClick,
+}: SectorBarChartProps): React.JSX.Element {
   const topSectors = data.slice(0, 15);
 
   const labels = topSectors.map((d) => d.sector);
@@ -54,6 +59,21 @@ export default function SectorBarChart({ data = [] }: SectorBarChartProps): Reac
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
+    onClick: (_event: ChartEvent, elements: ActiveElement[]) => {
+      if (!onSegmentClick || elements.length === 0) return;
+      const index = elements[0].index;
+      const clickedSector = topSectors[index]?.sector;
+      if (clickedSector) {
+        onSegmentClick(clickedSector);
+      }
+    },
+    onHover: (event: ChartEvent, chartElement: ActiveElement[]) => {
+      const nativeEvent = event.native;
+      if (nativeEvent && nativeEvent.target) {
+        (nativeEvent.target as HTMLElement).style.cursor =
+          chartElement.length > 0 && onSegmentClick ? 'pointer' : 'default';
+      }
+    },
     plugins: {
       legend: {
         display: false,

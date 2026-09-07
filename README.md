@@ -4,7 +4,7 @@ A production-grade full-stack analytics dashboard visualizing global trends, geo
 
 ---
 
-## 🏗️ Architecture Overview
+##  Architecture Overview
 
 - **Backend**: Node.js, Express 5, Mongoose 9, MongoDB Atlas.
 - **Frontend**: Next.js 16 (App Router), React 19, Chart.js, React-ChartJS-2, D3.js (v7), Tailwind CSS v4.
@@ -13,18 +13,19 @@ A production-grade full-stack analytics dashboard visualizing global trends, geo
 
 ---
 
-## 📊 Visualizations
+##  Visualizations
 
-1. **Executive KPI Cards** (`components/KpiCards.jsx`): Real-time metrics for Matched Insights, Avg Intensity, Avg Likelihood, and Avg Relevance.
-2. **Intensity by Sector** (`components/SectorBarChart.jsx`): Horizontal bar chart of the Top 15 sectors sorted by severity, with the `Unspecified` bucket visually differentiated in neutral slate.
-3. **Geographic Distribution** (`components/RegionDonutChart.jsx`): Doughnut chart of the Top 10 regions by record volume with a consolidated "Other" slice.
-4. **Temporal Trajectory** (`components/YearLineChart.jsx`): Dual-series line chart tracking Avg Likelihood and Avg Relevance over chronological years.
-5. **High-Frequency Strategic Topics** (`components/TopTopicsChart.jsx`): Top 10 recurring themes across insights.
-6. **Strategic Multi-Metric Landscape** (`components/BubbleChart.jsx`): Bespoke D3.js 4-variable visualization mapping Likelihood (X-axis) vs Intensity (Y-axis) vs Relevance (Bubble Area via `scaleSqrt`) vs Sector (Color).
+1. **Executive KPI Cards** (`components/KpiCards.tsx`): Real-time metrics for Matched Insights, Avg Intensity, Avg Likelihood, and Avg Relevance.
+2. **Intensity by Sector** (`components/SectorBarChart.tsx`): Horizontal bar chart of the Top 15 sectors sorted by severity, with click-to-filter drill-down and the `Unspecified` bucket visually differentiated in neutral slate.
+3. **Geographic Distribution** (`components/RegionDonutChart.tsx`): Doughnut chart of the Top 10 regions by record volume with click-to-filter drill-down and a consolidated "Other" slice.
+4. **Temporal Trajectory** (`components/YearLineChart.tsx`): Dual-series line chart tracking Avg Likelihood and Avg Relevance over chronological years.
+5. **High-Frequency Strategic Topics** (`components/TopTopicsChart.tsx`): Top 10 recurring themes across insights.
+6. **Strategic Multi-Metric Landscape** (`components/BubbleChart.tsx`): Bespoke D3.js 4-variable visualization mapping Likelihood (X-axis) vs Intensity (Y-axis) vs Relevance (Bubble Area via `scaleSqrt`) vs Sector (Color).
+7. **Active Filter Chips** (`components/ActiveFilterChips.tsx`): Real-time dismissible tags with individual remove buttons and full reset synchronization.
 
 ---
 
-## ⚖️ Known Limitations & Data Hygiene Decisions
+##  Known Limitations & Data Hygiene Decisions
 
 1. **Missing Score Coordinates in D3 Bubble Chart**:
    - In the source dataset (`jsondata.json`), ~38 records (3.8%) have blank or missing values for `intensity` and `likelihood`.
@@ -43,7 +44,7 @@ A production-grade full-stack analytics dashboard visualizing global trends, geo
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Backend Setup
 ```bash

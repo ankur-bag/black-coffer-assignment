@@ -5,8 +5,9 @@
  * Interactive filter toolbar providing quick dimension toggles and filter state management.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FilterOptions, FilterState } from '../lib/types';
+import ActiveFilterChips, { ActiveFilterChip } from './ActiveFilterChips';
 
 export interface FiltersPreviewProps {
   options: FilterOptions | null;
@@ -29,10 +30,21 @@ export default function FiltersPreview({
   const isNaSelected = filters.region?.includes('Northern America');
   const isUsaSelected = filters.country?.includes('United States of America');
 
-  const activeFilterEntries = (Object.entries(filters) as [keyof FilterState, string[]][]).filter(
-    ([_, values]) => Array.isArray(values) && values.length > 0
-  );
-  const totalActiveCount = activeFilterEntries.reduce((sum, [_, vals]) => sum + vals.length, 0);
+  const chips: ActiveFilterChip[] = useMemo(() => {
+    const list: ActiveFilterChip[] = [];
+    (Object.entries(filters) as [keyof FilterState, string[]][]).forEach(([field, values]) => {
+      if (Array.isArray(values)) {
+        values.forEach((val) => {
+          if (val) {
+            list.push({ field, value: val });
+          }
+        });
+      }
+    });
+    return list;
+  }, [filters]);
+
+  const totalActiveCount = chips.length;
 
   const handleToggle = (field: keyof FilterState, value: string) => {
     const current = filters[field] || [];
@@ -41,6 +53,14 @@ export default function FiltersPreview({
     } else {
       setFilter(field, [...current, value]);
     }
+  };
+
+  const handleRemoveChip = (field: keyof FilterState, value: string) => {
+    const current = filters[field] || [];
+    setFilter(
+      field,
+      current.filter((v) => v !== value)
+    );
   };
 
   return (
@@ -121,31 +141,8 @@ export default function FiltersPreview({
         </div>
       </div>
 
-      {/* Active filters pill list */}
-      {totalActiveCount > 0 && (
-        <div className="pt-3 flex items-center gap-2 flex-wrap">
-          <span className="text-metadata font-medium">Applied:</span>
-          {activeFilterEntries.map(([field, values]) =>
-            values.map((val) => (
-              <span
-                key={`${field}-${val}`}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-[var(--color-bg-muted)] border border-[var(--color-border)] text-[var(--color-text-primary)]"
-              >
-                <span className="text-metadata text-[var(--color-text-secondary)]">{field}:</span>
-                <span className="font-medium">{val}</span>
-                <button
-                  type="button"
-                  onClick={() => handleToggle(field, val)}
-                  className="hover:text-rose-600 cursor-pointer ml-0.5 text-xs font-bold leading-none"
-                  aria-label={`Remove ${val}`}
-                >
-                  ×
-                </button>
-              </span>
-            ))
-          )}
-        </div>
-      )}
+      {/* Active filters chips component */}
+      <ActiveFilterChips chips={chips} onRemove={handleRemoveChip} onClearAll={resetFilters} />
 
       {/* Collapsible raw options inspector */}
       {showOptionsInspector && (

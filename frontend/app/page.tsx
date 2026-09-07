@@ -164,8 +164,14 @@ export default function DashboardPage(): React.JSX.Element {
             </>
           ) : (
             <>
-              <SectorBarChart data={stats?.intensityBySector || []} />
-              <RegionDonutChart data={stats?.countByRegion || []} />
+              <SectorBarChart
+                data={stats?.intensityBySector || []}
+                onSegmentClick={(sector: string) => setFilter('sector', [sector])}
+              />
+              <RegionDonutChart
+                data={stats?.countByRegion || []}
+                onSegmentClick={(region: string) => setFilter('region', [region])}
+              />
               <YearLineChart data={stats?.metricsByYear || []} />
               <TopTopicsChart data={stats?.topTopics || []} />
               <div className="lg:col-span-2">

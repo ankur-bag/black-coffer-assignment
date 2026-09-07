@@ -36,10 +36,17 @@ const buildMongoFilter = (query) => {
         values = [values];
       }
 
-      if (values.length === 1) {
-        filter[field] = values[0];
-      } else if (values.length > 1) {
-        filter[field] = { $in: values };
+      // Support drill-down into unclassified records labeled 'Unspecified' in charts
+      const hasUnspecified = values.includes('Unspecified');
+      const regularValues = values.filter((v) => v !== 'Unspecified');
+
+      if (hasUnspecified) {
+        const matchValues = [...regularValues, '', null];
+        filter[field] = { $in: matchValues };
+      } else if (regularValues.length === 1) {
+        filter[field] = regularValues[0];
+      } else if (regularValues.length > 1) {
+        filter[field] = { $in: regularValues };
       }
     }
   }
