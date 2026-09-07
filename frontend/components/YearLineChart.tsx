@@ -1,11 +1,6 @@
 'use client';
 
-/**
- * @file YearLineChart.jsx
- * Dual-series line chart tracking Avg Likelihood and Avg Relevance across chronological years.
- * Preserves backend order (ascending years with 'Unspecified' positioned last).
- */
-
+import React from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -14,8 +9,11 @@ import {
   LineElement,
   Tooltip,
   Legend,
+  ChartOptions,
+  TooltipItem,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { YearStat } from '../lib/types';
 import { ACCENT_SECONDARY, ACCENT_TERTIARY } from '../lib/chartColors';
 
 ChartJS.register(
@@ -27,11 +25,11 @@ ChartJS.register(
   Legend
 );
 
-/**
- * @param {Object} props
- * @param {Array<{year: string, avgLikelihood: number, avgRelevance: number, count: number}>} [props.data=[]]
- */
-export default function YearLineChart({ data = [] }) {
+export interface YearLineChartProps {
+  data?: YearStat[];
+}
+
+export default function YearLineChart({ data = [] }: YearLineChartProps): React.JSX.Element {
   const labels = data.map((d) => d.year);
   const likelihoodValues = data.map((d) => d.avgLikelihood);
   const relevanceValues = data.map((d) => d.avgRelevance);
@@ -62,7 +60,7 @@ export default function YearLineChart({ data = [] }) {
     ],
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'line'> = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -86,7 +84,7 @@ export default function YearLineChart({ data = [] }) {
         padding: 10,
         cornerRadius: 6,
         callbacks: {
-          afterTitle: (items) => {
+          afterTitle: (items: TooltipItem<'line'>[]) => {
             const index = items[0]?.dataIndex;
             const item = data[index];
             return item ? `Sample Size: ${item.count} record(s)` : '';
@@ -118,7 +116,7 @@ export default function YearLineChart({ data = [] }) {
           display: true,
           text: 'Scale (0 - 5)',
           color: '#64748b',
-          font: { size: 11, weight: '500' },
+          font: { size: 11, weight: 500 },
         },
       },
     },

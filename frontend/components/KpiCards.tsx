@@ -1,24 +1,34 @@
+import React from 'react';
+
 /**
- * @file KpiCards.jsx
+ * @file KpiCards.tsx
  * Executive metrics row displaying high-level statistical indicators with transition animations.
  */
 
-/**
- * @param {Object} props
- * @param {number} [props.matchedCount=0]
- * @param {number} [props.avgIntensity=0]
- * @param {number} [props.avgLikelihood=0]
- * @param {number} [props.avgRelevance=0]
- * @param {boolean} [props.loading=false]
- */
+export interface KpiCardsProps {
+  matchedCount?: number;
+  avgIntensity?: number;
+  avgLikelihood?: number;
+  avgRelevance?: number;
+  loading?: boolean;
+}
+
+interface KpiItem {
+  id: string;
+  label: string;
+  sublabel: string;
+  value: string;
+  isPrimary: boolean;
+}
+
 export default function KpiCards({
   matchedCount = 0,
   avgIntensity = 0,
   avgLikelihood = 0,
   avgRelevance = 0,
   loading = false,
-}) {
-  const cards = [
+}: KpiCardsProps): React.JSX.Element {
+  const cards: KpiItem[] = [
     {
       id: 'kpi-records',
       label: 'Matched Insights',

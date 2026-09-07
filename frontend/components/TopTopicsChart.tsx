@@ -1,11 +1,6 @@
 'use client';
 
-/**
- * @file SectorBarChart.jsx
- * Horizontal bar chart displaying Top 15 Sectors by Average Intensity.
- * Renders the "Unspecified" bucket with an explicit muted neutral styling and descriptive tooltip.
- */
-
+import React from 'react';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,8 +8,11 @@ import {
   BarElement,
   Tooltip,
   Legend,
+  ChartOptions,
+  TooltipItem,
 } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { TopicStat } from '../lib/types';
 import { getSectorBarColor } from '../lib/chartColors';
 
 ChartJS.register(
@@ -25,23 +23,21 @@ ChartJS.register(
   Legend
 );
 
-/**
- * @param {Object} props
- * @param {Array<{sector: string, avgIntensity: number, count: number}>} [props.data=[]]
- */
-export default function SectorBarChart({ data = [] }) {
-  const topSectors = data.slice(0, 15);
+export interface TopTopicsChartProps {
+  data?: TopicStat[];
+}
 
-  const labels = topSectors.map((d) => d.sector);
-  const values = topSectors.map((d) => d.avgIntensity);
-  const backgroundColors = topSectors.map((d) => getSectorBarColor(d.sector).background);
-  const borderColors = topSectors.map((d) => getSectorBarColor(d.sector).border);
+export default function TopTopicsChart({ data = [] }: TopTopicsChartProps): React.JSX.Element {
+  const labels = data.map((d) => d.topic);
+  const values = data.map((d) => d.count);
+  const backgroundColors = data.map((d) => getSectorBarColor(d.topic).background);
+  const borderColors = data.map((d) => getSectorBarColor(d.topic).border);
 
   const chartData = {
     labels,
     datasets: [
       {
-        label: 'Avg Intensity',
+        label: 'Insight Count',
         data: values,
         backgroundColor: backgroundColors,
         borderColor: borderColors,
@@ -51,7 +47,7 @@ export default function SectorBarChart({ data = [] }) {
     ],
   };
 
-  const chartOptions = {
+  const chartOptions: ChartOptions<'bar'> = {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
@@ -68,17 +64,12 @@ export default function SectorBarChart({ data = [] }) {
         padding: 10,
         cornerRadius: 6,
         callbacks: {
-          label: (context) => `Avg Intensity: ${context.parsed.x}`,
-          afterLabel: (context) => {
-            const item = topSectors[context.dataIndex];
-            if (!item) return '';
-            if (item.sector === 'Unspecified') {
-              return [
-                `Records: ${item.count}`,
-                'Note: Unclassified records in source dataset',
-              ];
+          label: (context: TooltipItem<'bar'>) => `Frequency: ${context.parsed.x} insights`,
+          afterLabel: (context: TooltipItem<'bar'>) => {
+            if (context.label === 'Unspecified') {
+              return 'Unclassified topic in source dataset';
             }
-            return `Records: ${item.count}`;
+            return '';
           },
         },
       },
@@ -94,9 +85,9 @@ export default function SectorBarChart({ data = [] }) {
         },
         title: {
           display: true,
-          text: 'Average Intensity Score',
+          text: 'Frequency Count',
           color: '#64748b',
-          font: { size: 11, weight: '500' },
+          font: { size: 11, weight: 500 },
         },
       },
       y: {
@@ -105,7 +96,7 @@ export default function SectorBarChart({ data = [] }) {
         },
         ticks: {
           color: '#334155',
-          font: { size: 11, weight: '500' },
+          font: { size: 11, weight: 500 },
         },
       },
     },
@@ -115,18 +106,13 @@ export default function SectorBarChart({ data = [] }) {
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg p-6 shadow-xs flex flex-col h-[400px]">
       <div className="flex items-center justify-between pb-3 mb-3 border-b border-[var(--color-border)]">
         <div>
-          <h2 className="text-section-label">Intensity by Sector</h2>
+          <h2 className="text-section-label">High-Frequency Strategic Topics</h2>
           <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-            Top 15 sectors sorted by average impact severity
+            Top 10 themes shaping global market intelligence
           </p>
         </div>
-        <div className="flex items-center gap-3 text-xs">
-          <span className="inline-flex items-center gap-1.5 text-metadata">
-            <span className="w-2.5 h-2.5 rounded-xs bg-[var(--color-accent)]" /> Sector
-          </span>
-          <span className="inline-flex items-center gap-1.5 text-metadata">
-            <span className="w-2.5 h-2.5 rounded-xs bg-slate-400" /> Unspecified
-          </span>
+        <div className="text-metadata text-[var(--color-text-secondary)]">
+          Ranked by occurrence
         </div>
       </div>
 

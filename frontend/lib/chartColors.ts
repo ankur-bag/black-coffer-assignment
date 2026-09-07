@@ -1,6 +1,6 @@
 /**
- * @file chartColors.js
- * Centralized design-token color palettes and styling helpers for Chart.js components.
+ * @file chartColors.ts
+ * Centralized design-token color palettes and styling helpers for chart components.
  * Adheres strictly to the Sapphire Blue (#2563eb) and Slate canvas design system.
  */
 
@@ -16,7 +16,7 @@ export const COLOR_UNSPECIFIED_BORDER = '#64748b';
 export const COLOR_OTHER = '#cbd5e1';         // Slate-300
 
 // Harmonious categorical palette for multi-slice charts (e.g. Region Donut)
-export const CATEGORICAL_PALETTE = [
+export const CATEGORICAL_PALETTE: readonly string[] = [
   '#2563eb', // Sapphire Blue
   '#0284c7', // Cerulean
   '#0d9488', // Deep Teal
@@ -30,34 +30,32 @@ export const CATEGORICAL_PALETTE = [
 ];
 
 // Deterministic color mapping per sector shared across SectorBarChart & D3 BubbleChart
-export const SECTOR_COLOR_MAP = {
-  'Energy': '#2563eb',
-  'Manufacturing': '#10b981',
+export const SECTOR_COLOR_MAP: Record<string, string> = {
+  Energy: '#2563eb',
+  Manufacturing: '#10b981',
   'Financial services': '#8b5cf6',
-  'Retail': '#f59e0b',
+  Retail: '#f59e0b',
   'Aerospace & defence': '#0284c7',
-  'Government': '#6366f1',
+  Government: '#6366f1',
   'Support services': '#06b6d4',
   'Information Technology': '#3b82f6',
-  'Environment': '#0d9488',
-  'Construction': '#d97706',
+  Environment: '#0d9488',
+  Construction: '#d97706',
   'Food & agriculture': '#84cc16',
-  'Transport': '#4f46e5',
-  'Automotive': '#f97316',
-  'Water': '#0ea5e9',
-  'Healthcare': '#ec4899',
-  'Security': '#e11d48',
+  Transport: '#4f46e5',
+  Automotive: '#f97316',
+  Water: '#0ea5e9',
+  Healthcare: '#ec4899',
+  Security: '#e11d48',
   'Tourism & hospitality': '#14b8a6',
   'Media & entertainment': '#a855f7',
-  'Unspecified': '#94a3b8',
+  Unspecified: '#94a3b8',
 };
 
 /**
  * Returns color hex for a sector.
- * @param {string} sectorName
- * @returns {string}
  */
-export function getSectorColor(sectorName) {
+export function getSectorColor(sectorName: string): string {
   if (sectorName === 'Unspecified' || !sectorName) {
     return COLOR_UNSPECIFIED;
   }
@@ -66,10 +64,8 @@ export function getSectorColor(sectorName) {
 
 /**
  * Returns color for sector bar chart. 'Unspecified' is visually muted.
- * @param {string} sectorName
- * @returns {{ background: string, border: string }}
  */
-export function getSectorBarColor(sectorName) {
+export function getSectorBarColor(sectorName: string): { background: string; border: string } {
   if (sectorName === 'Unspecified' || !sectorName) {
     return {
       background: 'rgba(148, 163, 184, 0.45)', // Muted Slate
@@ -86,13 +82,11 @@ export function getSectorBarColor(sectorName) {
 /**
  * Maps region labels to coordinated colors, ensuring 'Unspecified' and 'Other'
  * receive distinct neutral treatments.
- * @param {string[]} labels
- * @returns {{ backgrounds: string[], borders: string[] }}
  */
-export function getRegionColors(labels) {
+export function getRegionColors(labels: string[]): { backgrounds: string[]; borders: string[] } {
   let paletteIndex = 0;
-  const backgrounds = [];
-  const borders = [];
+  const backgrounds: string[] = [];
+  const borders: string[] = [];
 
   for (const label of labels) {
     if (label === 'Unspecified') {
@@ -138,7 +132,7 @@ export const commonChartOptions = {
       cornerRadius: 6,
       titleFont: {
         size: 12,
-        weight: '600',
+        weight: '600' as const,
       },
       bodyFont: {
         size: 11,

@@ -1,28 +1,18 @@
-/**
- * @file StatsPreview.jsx
- * Presentational component displaying aggregated metrics and raw JSON verification for Phase 3.
- */
+import React from 'react';
+import { StatsResponse } from '../lib/types';
 
 /**
- * @typedef {Object} StatsData
- * @property {number} matchedCount
- * @property {number} avgIntensity
- * @property {number} avgLikelihood
- * @property {number} avgRelevance
- * @property {Array<{sector: string, avgIntensity: number, count: number}>} intensityBySector
- * @property {Array<{region: string, count: number}>} countByRegion
- * @property {Array<{year: string, avgLikelihood: number, avgRelevance: number, count: number}>} metricsByYear
- * @property {Array<{topic: string, count: number}>} topTopics
- * @property {Array<{intensity: number, likelihood: number, relevance: number, sector: string}>} bubblePoints
+ * @file StatsPreview.tsx
+ * Presentational component displaying aggregated metrics and raw JSON verification for testing.
  */
 
-/**
- * @param {Object} props
- * @param {StatsData | null} props.stats
- * @param {boolean} props.loading
- * @param {string | null} [props.error]
- */
-export default function StatsPreview({ stats, loading = false, error = null }) {
+export interface StatsPreviewProps {
+  stats: StatsResponse | null;
+  loading?: boolean;
+  error?: string | null;
+}
+
+export default function StatsPreview({ stats, loading = false, error = null }: StatsPreviewProps): React.JSX.Element {
   const kpis = [
     { label: 'Matched Records', value: stats?.matchedCount ?? 0 },
     { label: 'Avg Intensity', value: stats?.avgIntensity ?? 0 },

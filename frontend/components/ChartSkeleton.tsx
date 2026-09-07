@@ -1,13 +1,15 @@
+import React from 'react';
+
 /**
- * @file ChartSkeleton.jsx
+ * @file ChartSkeleton.tsx
  * Accessible loading placeholder for dashboard chart cards.
  */
 
-/**
- * @param {Object} props
- * @param {string} props.title
- */
-export default function ChartSkeleton({ title }) {
+export interface ChartSkeletonProps {
+  title: string;
+}
+
+export default function ChartSkeleton({ title }: ChartSkeletonProps): React.JSX.Element {
   return (
     <div className="bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg p-6 shadow-xs h-[400px] flex flex-col justify-between animate-pulse">
       <div className="border-b border-[var(--color-border)] pb-3 mb-3">

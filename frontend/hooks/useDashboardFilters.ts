@@ -1,25 +1,12 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-
-/**
- * @typedef {Object} DashboardFilters
- * @property {string[]} end_year
- * @property {string[]} topic
- * @property {string[]} sector
- * @property {string[]} region
- * @property {string[]} pestle
- * @property {string[]} source
- * @property {string[]} country
- * @property {string[]} city
- * @property {string[]} swot
- */
+import { FilterState } from '../lib/types';
 
 /**
  * Initial empty filter state matching the backend filterable fields.
- * @type {DashboardFilters}
  */
-export const INITIAL_FILTERS = {
+export const INITIAL_FILTERS: FilterState = {
   end_year: [],
   topic: [],
   sector: [],
@@ -31,20 +18,19 @@ export const INITIAL_FILTERS = {
   swot: [],
 };
 
+export interface UseDashboardFiltersReturn {
+  filters: FilterState;
+  setFilter: (field: keyof FilterState, values: string[] | string) => void;
+  resetFilters: () => void;
+  setAllFilters: React.Dispatch<React.SetStateAction<FilterState>>;
+}
+
 /**
  * Custom hook for managing pure dashboard filter state.
  * Contains zero network/fetching logic, making it independently testable and reusable.
- *
- * @param {Partial<DashboardFilters>} [initialState]
- * @returns {{
- *   filters: DashboardFilters,
- *   setFilter: (field: keyof DashboardFilters, values: string[] | string) => void,
- *   resetFilters: () => void,
- *   setAllFilters: (newFilters: DashboardFilters | ((prev: DashboardFilters) => DashboardFilters)) => void
- * }}
  */
-export function useDashboardFilters(initialState = {}) {
-  const [filters, setFilters] = useState(() => ({
+export function useDashboardFilters(initialState: Partial<FilterState> = {}): UseDashboardFiltersReturn {
+  const [filters, setFilters] = useState<FilterState>(() => ({
     ...INITIAL_FILTERS,
     ...initialState,
   }));
@@ -52,9 +38,9 @@ export function useDashboardFilters(initialState = {}) {
   /**
    * Updates a single filter field. Normalizes values to an array of strings.
    */
-  const setFilter = useCallback((field, values) => {
+  const setFilter = useCallback((field: keyof FilterState, values: string[] | string) => {
     setFilters((prev) => {
-      let normalizedValues = [];
+      let normalizedValues: string[] = [];
       if (Array.isArray(values)) {
         normalizedValues = values.filter((v) => v !== undefined && v !== null && String(v).trim() !== '');
       } else if (values !== undefined && values !== null && String(values).trim() !== '') {

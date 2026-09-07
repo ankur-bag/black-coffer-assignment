@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getFilters, getStats } from '../lib/api';
 import { useDashboardFilters } from '../hooks/useDashboardFilters';
+import { FilterOptions, FilterState, StatsResponse } from '../lib/types';
 import DashboardHeader from '../components/DashboardHeader';
 import FiltersPreview from '../components/FiltersPreview';
 import KpiCards from '../components/KpiCards';
@@ -13,18 +14,28 @@ import TopTopicsChart from '../components/TopTopicsChart';
 import BubbleChart from '../components/BubbleChart';
 import ChartSkeleton from '../components/ChartSkeleton';
 
+// Typed window augmentation for development debug access without 'any' casts
+declare global {
+  interface Window {
+    setFilter?: (field: keyof FilterState, values: string[] | string) => void;
+    setFilters?: React.Dispatch<React.SetStateAction<FilterState>>;
+    resetFilters?: () => void;
+    getFiltersState?: () => FilterState;
+  }
+}
+
 /**
  * Main dashboard container component (Data & Orchestration Layer).
  * Coordinates filter state, initial filter options, and debounced stats querying.
  */
-export default function DashboardPage() {
+export default function DashboardPage(): React.JSX.Element {
   const { filters, setFilter, resetFilters, setAllFilters } = useDashboardFilters();
 
-  const [filterOptions, setFilterOptions] = useState(null);
-  const [stats, setStats] = useState(null);
-  const [loadingFilters, setLoadingFilters] = useState(true);
-  const [loadingStats, setLoadingStats] = useState(true);
-  const [error, setError] = useState(null);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
+  const [loadingFilters, setLoadingFilters] = useState<boolean>(true);
+  const [loadingStats, setLoadingStats] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   // TODO [Phase 5 / Cleanup]: Strip window debug hooks before final production submission
   useEffect(() => {
@@ -42,16 +53,17 @@ export default function DashboardPage() {
     setLoadingFilters(true);
 
     getFilters()
-      .then((data) => {
+      .then((data: FilterOptions) => {
         if (isMounted) {
           setFilterOptions(data);
           setLoadingFilters(false);
         }
       })
-      .catch((err) => {
+      .catch((err: unknown) => {
         if (isMounted) {
+          const message = err instanceof Error ? err.message : 'Failed to fetch options';
           console.error('[DashboardPage] Failed to fetch filter options:', err);
-          setError(err.message);
+          setError(message);
           setLoadingFilters(false);
         }
       });
@@ -66,13 +78,14 @@ export default function DashboardPage() {
     setLoadingStats(true);
     const debounceTimer = setTimeout(() => {
       getStats(filters)
-        .then((data) => {
+        .then((data: StatsResponse) => {
           setStats(data);
           setLoadingStats(false);
         })
-        .catch((err) => {
+        .catch((err: unknown) => {
+          const message = err instanceof Error ? err.message : 'Failed to fetch statistics';
           console.error('[DashboardPage] Failed to fetch stats payload:', err);
-          setError(err.message);
+          setError(message);
           setLoadingStats(false);
         });
     }, 200);
@@ -82,7 +95,7 @@ export default function DashboardPage() {
     };
   }, [filters]);
 
-  const isEmpty = stats && stats.matchedCount === 0;
+  const isEmpty = stats !== null && stats.matchedCount === 0;
 
   return (
     <main className="w-full max-w-[var(--max-width-container)] mx-auto px-4 sm:px-6 lg:px-8 py-8">

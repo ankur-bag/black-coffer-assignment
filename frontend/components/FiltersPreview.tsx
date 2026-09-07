@@ -1,39 +1,40 @@
 'use client';
 
 /**
- * @file FiltersPreview.jsx
+ * @file FiltersPreview.tsx
  * Interactive filter toolbar providing quick dimension toggles and filter state management.
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
+import { FilterOptions, FilterState } from '../lib/types';
 
-/**
- * @param {Object} props
- * @param {Record<string, string[]> | null} props.options - Available filter options per field
- * @param {Record<string, string[]>} props.filters - Current selected filter state
- * @param {(field: string, values: string[] | string) => void} props.setFilter - Updater for single field
- * @param {() => void} props.resetFilters - Function to reset all filters
- * @param {boolean} [props.loading=false] - Indicates options fetching state
- */
+export interface FiltersPreviewProps {
+  options: FilterOptions | null;
+  filters: FilterState;
+  setFilter: (field: keyof FilterState, values: string[] | string) => void;
+  resetFilters: () => void;
+  loading?: boolean;
+}
+
 export default function FiltersPreview({
   options,
   filters,
   setFilter,
   resetFilters,
   loading = false,
-}) {
+}: FiltersPreviewProps): React.JSX.Element {
   const [showOptionsInspector, setShowOptionsInspector] = useState(false);
 
   const isEnergySelected = filters.sector?.includes('Energy');
   const isNaSelected = filters.region?.includes('Northern America');
   const isUsaSelected = filters.country?.includes('United States of America');
 
-  const activeFilterEntries = Object.entries(filters).filter(
+  const activeFilterEntries = (Object.entries(filters) as [keyof FilterState, string[]][]).filter(
     ([_, values]) => Array.isArray(values) && values.length > 0
   );
   const totalActiveCount = activeFilterEntries.reduce((sum, [_, vals]) => sum + vals.length, 0);
 
-  const handleToggle = (field, value) => {
+  const handleToggle = (field: keyof FilterState, value: string) => {
     const current = filters[field] || [];
     if (current.includes(value)) {
       setFilter(field, current.filter((v) => v !== value));

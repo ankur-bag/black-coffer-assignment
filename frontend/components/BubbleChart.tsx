@@ -1,35 +1,38 @@
 'use client';
 
 /**
- * @file BubbleChart.jsx
+ * @file BubbleChart.tsx
  * Bespoke D3.js Multi-Metric Visualization (Intensity vs Likelihood vs Relevance by Sector).
- * Uses pure D3 (import * as d3 from 'd3') with SVG ref, ResizeObserver, dynamic domains,
- * area-proportional circle sizing (scaleSqrt), and centralized design tokens.
+ * Fully type-safe using @types/d3 with explicit D3 selections, SVG refs, and custom tooltip state.
  */
 
-import { useRef, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
-import { getSectorColor, COLOR_UNSPECIFIED } from '../lib/chartColors';
+import { BubblePoint } from '../lib/types';
+import { getSectorColor } from '../lib/chartColors';
 
-/**
- * @typedef {Object} BubblePoint
- * @property {number} intensity
- * @property {number} likelihood
- * @property {number} relevance
- * @property {string} sector
- */
+export interface BubbleChartProps {
+  data?: BubblePoint[];
+}
 
-/**
- * @param {Object} props
- * @param {BubblePoint[]} [props.data=[]]
- */
-export default function BubbleChart({ data = [] }) {
-  const containerRef = useRef(null);
-  const svgRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 0, height: 460 });
+interface TooltipState {
+  visible: boolean;
+  x: number;
+  y: number;
+  point: BubblePoint | null;
+}
 
-  // Tooltip state for floating HTML tooltip
-  const [tooltip, setTooltip] = useState({
+interface ChartDimensions {
+  width: number;
+  height: number;
+}
+
+export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.Element {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const [dimensions, setDimensions] = useState<ChartDimensions>({ width: 0, height: 460 });
+
+  const [tooltip, setTooltip] = useState<TooltipState>({
     visible: false,
     x: 0,
     y: 0,
@@ -40,7 +43,7 @@ export default function BubbleChart({ data = [] }) {
   useEffect(() => {
     if (!containerRef.current) return;
 
-    const observer = new ResizeObserver((entries) => {
+    const observer = new ResizeObserver((entries: ResizeObserverEntry[]) => {
       if (!entries || entries.length === 0) return;
       const { width } = entries[0].contentRect;
       if (width > 0) {
@@ -56,18 +59,16 @@ export default function BubbleChart({ data = [] }) {
   }, []);
 
   // Compute unique sectors present in current data for the dynamic compact legend
-  const activeSectors = useMemo(() => {
-    const set = new Set();
+  const activeSectors: string[] = useMemo(() => {
+    const set = new Set<string>();
     for (const d of data) {
       set.add(d.sector || 'Unspecified');
     }
-    // Put Unspecified last if present, sort others alphabetically
-    const list = Array.from(set).sort((a, b) => {
+    return Array.from(set).sort((a, b) => {
       if (a === 'Unspecified') return 1;
       if (b === 'Unspecified') return -1;
       return a.localeCompare(b);
     });
-    return list;
   }, [data]);
 
   // Main D3 rendering effect
@@ -79,7 +80,7 @@ export default function BubbleChart({ data = [] }) {
     const innerWidth = width - margin.left - margin.right;
     const innerHeight = height - margin.top - margin.bottom;
 
-    const svg = d3.select(svgRef.current);
+    const svg: d3.Selection<SVGSVGElement, unknown, null, undefined> = d3.select(svgRef.current);
 
     // 1. Mandatory cleanup: remove all previous SVG contents to prevent ghosting on filter updates
     svg.selectAll('*').remove();
@@ -97,12 +98,12 @@ export default function BubbleChart({ data = [] }) {
     }
 
     // 2. Dynamic domains padded by ~10% for natural spread
-    const xMin = d3.min(data, (d) => d.likelihood) ?? 0;
-    const xMax = d3.max(data, (d) => d.likelihood) ?? 5;
+    const xMin = d3.min(data, (d: BubblePoint) => d.likelihood) ?? 0;
+    const xMax = d3.max(data, (d: BubblePoint) => d.likelihood) ?? 5;
     const xPad = (xMax - xMin) * 0.1 || 0.5;
 
-    const yMin = d3.min(data, (d) => d.intensity) ?? 0;
-    const yMax = d3.max(data, (d) => d.intensity) ?? 50;
+    const yMin = d3.min(data, (d: BubblePoint) => d.intensity) ?? 0;
+    const yMax = d3.max(data, (d: BubblePoint) => d.intensity) ?? 50;
     const yPad = (yMax - yMin) * 0.1 || 5;
 
     const xScale = d3
@@ -118,7 +119,7 @@ export default function BubbleChart({ data = [] }) {
       .nice();
 
     // 3. Circle radius scaled by area (scaleSqrt) of relevance
-    const rMax = d3.max(data, (d) => d.relevance) ?? 5;
+    const rMax = d3.max(data, (d: BubblePoint) => d.relevance) ?? 5;
     const rScale = d3
       .scaleSqrt()
       .domain([0, Math.max(1, rMax)])
@@ -135,8 +136,8 @@ export default function BubbleChart({ data = [] }) {
       .join('line')
       .attr('x1', margin.left)
       .attr('x2', width - margin.right)
-      .attr('y1', (d) => yScale(d))
-      .attr('y2', (d) => yScale(d))
+      .attr('y1', (d: number) => yScale(d))
+      .attr('y2', (d: number) => yScale(d))
       .attr('stroke', 'rgba(226, 232, 240, 0.6)')
       .attr('stroke-dasharray', '3 3');
 
@@ -146,8 +147,8 @@ export default function BubbleChart({ data = [] }) {
       .selectAll('line')
       .data(xScale.ticks(6))
       .join('line')
-      .attr('x1', (d) => xScale(d))
-      .attr('x2', (d) => xScale(d))
+      .attr('x1', (d: number) => xScale(d))
+      .attr('x2', (d: number) => xScale(d))
       .attr('y1', margin.top)
       .attr('y2', height - margin.bottom)
       .attr('stroke', 'rgba(226, 232, 240, 0.6)')
@@ -202,23 +203,23 @@ export default function BubbleChart({ data = [] }) {
     const gBubbles = svg.append('g').attr('class', 'bubbles');
 
     gBubbles
-      .selectAll('circle')
+      .selectAll<SVGCircleElement, BubblePoint>('circle')
       .data(data)
       .join('circle')
-      .attr('cx', (d) => xScale(d.likelihood))
-      .attr('cy', (d) => yScale(d.intensity))
-      .attr('r', (d) => rScale(d.relevance))
-      .attr('fill', (d) => {
+      .attr('cx', (d: BubblePoint) => xScale(d.likelihood))
+      .attr('cy', (d: BubblePoint) => yScale(d.intensity))
+      .attr('r', (d: BubblePoint) => rScale(d.relevance))
+      .attr('fill', (d: BubblePoint) => {
         const sector = d.sector || 'Unspecified';
         return sector === 'Unspecified'
           ? 'rgba(148, 163, 184, 0.4)'
           : getSectorColor(sector);
       })
-      .attr('fill-opacity', (d) => ((d.sector || 'Unspecified') === 'Unspecified' ? 0.45 : 0.65))
-      .attr('stroke', (d) => getSectorColor(d.sector || 'Unspecified'))
+      .attr('fill-opacity', (d: BubblePoint) => ((d.sector || 'Unspecified') === 'Unspecified' ? 0.45 : 0.65))
+      .attr('stroke', (d: BubblePoint) => getSectorColor(d.sector || 'Unspecified'))
       .attr('stroke-width', 1.2)
       .style('cursor', 'pointer')
-      .on('mouseenter', function (event, d) {
+      .on('mouseenter', function (this: SVGCircleElement, event: MouseEvent, d: BubblePoint) {
         // Enlarge and highlight hovered circle
         d3.select(this)
           .raise()
@@ -228,7 +229,7 @@ export default function BubbleChart({ data = [] }) {
           .attr('fill-opacity', 0.9)
           .attr('stroke-width', 2.5);
 
-        // Position tooltip relative to container
+        if (!containerRef.current) return;
         const bounds = containerRef.current.getBoundingClientRect();
         setTooltip({
           visible: true,
@@ -237,16 +238,16 @@ export default function BubbleChart({ data = [] }) {
           point: d,
         });
       })
-      .on('mousemove', function (event, d) {
+      .on('mousemove', function (event: MouseEvent) {
         if (!containerRef.current) return;
         const bounds = containerRef.current.getBoundingClientRect();
-        setTooltip((prev) => ({
+        setTooltip((prev: TooltipState) => ({
           ...prev,
           x: event.clientX - bounds.left,
           y: event.clientY - bounds.top - 12,
         }));
       })
-      .on('mouseleave', function (event, d) {
+      .on('mouseleave', function (this: SVGCircleElement, _event: MouseEvent, d: BubblePoint) {
         d3.select(this)
           .transition()
           .duration(150)
@@ -254,7 +255,7 @@ export default function BubbleChart({ data = [] }) {
           .attr('fill-opacity', (d.sector || 'Unspecified') === 'Unspecified' ? 0.45 : 0.65)
           .attr('stroke-width', 1.2);
 
-        setTooltip((prev) => ({ ...prev, visible: false }));
+        setTooltip((prev: TooltipState) => ({ ...prev, visible: false }));
       });
   }, [data, dimensions]);
 
@@ -336,7 +337,7 @@ export default function BubbleChart({ data = [] }) {
           <span className="text-metadata font-medium text-[var(--color-text-secondary)]">
             Active Sectors ({activeSectors.length}):
           </span>
-          {activeSectors.map((sector) => {
+          {activeSectors.map((sector: string) => {
             const isUnspecified = sector === 'Unspecified';
             return (
               <span key={sector} className="inline-flex items-center gap-1.5 text-metadata">

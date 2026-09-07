@@ -1,12 +1,14 @@
 /**
- * API client library for Blackcoffer Insights dashboard
+ * @file api.ts
+ * Type-safe API client for Blackcoffer Insights telemetry and aggregations.
  */
+
+import { FilterOptions, FilterState, StatsResponse } from './types';
 
 /**
  * Fetches available filter distinct values.
- * @returns {Promise<Record<string, string[]>>}
  */
-export async function getFilters() {
+export async function getFilters(): Promise<FilterOptions> {
   const url = '/api/insights/filters';
   try {
     const res = await fetch(url);
@@ -14,9 +16,11 @@ export async function getFilters() {
       console.error(`[API Error] Failed to fetch filters from ${url}. Status: ${res.status} ${res.statusText}`);
       throw new Error(`Failed to fetch filters from ${url} (status: ${res.status})`);
     }
-    return await res.json();
-  } catch (error) {
-    console.error(`[API Error] Network or parse failure for ${url}:`, error);
+    const data: FilterOptions = await res.json();
+    return data;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown network failure';
+    console.error(`[API Error] Network or parse failure for ${url}:`, message);
     throw error;
   }
 }
@@ -24,10 +28,8 @@ export async function getFilters() {
 /**
  * Fetches aggregated metrics and statistics based on selected filters.
  * Serializes array values into repeated query params (e.g. sector=Energy&sector=Government).
- * @param {Record<string, string[]>} filters
- * @returns {Promise<any>}
  */
-export async function getStats(filters = {}) {
+export async function getStats(filters: Partial<FilterState> = {}): Promise<StatsResponse> {
   const params = new URLSearchParams();
 
   for (const [key, values] of Object.entries(filters)) {
@@ -51,9 +53,11 @@ export async function getStats(filters = {}) {
       console.error(`[API Error] Failed to fetch stats from ${url}. Status: ${res.status} ${res.statusText}`);
       throw new Error(`Failed to fetch stats from ${url} (status: ${res.status})`);
     }
-    return await res.json();
-  } catch (error) {
-    console.error(`[API Error] Network or parse failure for ${url}:`, error);
+    const data: StatsResponse = await res.json();
+    return data;
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown network failure';
+    console.error(`[API Error] Network or parse failure for ${url}:`, message);
     throw error;
   }
 }
