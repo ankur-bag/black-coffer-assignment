@@ -29,21 +29,57 @@ export const CATEGORICAL_PALETTE = [
   '#475569', // Slate-600
 ];
 
+// Deterministic color mapping per sector shared across SectorBarChart & D3 BubbleChart
+export const SECTOR_COLOR_MAP = {
+  'Energy': '#2563eb',
+  'Manufacturing': '#10b981',
+  'Financial services': '#8b5cf6',
+  'Retail': '#f59e0b',
+  'Aerospace & defence': '#0284c7',
+  'Government': '#6366f1',
+  'Support services': '#06b6d4',
+  'Information Technology': '#3b82f6',
+  'Environment': '#0d9488',
+  'Construction': '#d97706',
+  'Food & agriculture': '#84cc16',
+  'Transport': '#4f46e5',
+  'Automotive': '#f97316',
+  'Water': '#0ea5e9',
+  'Healthcare': '#ec4899',
+  'Security': '#e11d48',
+  'Tourism & hospitality': '#14b8a6',
+  'Media & entertainment': '#a855f7',
+  'Unspecified': '#94a3b8',
+};
+
+/**
+ * Returns color hex for a sector.
+ * @param {string} sectorName
+ * @returns {string}
+ */
+export function getSectorColor(sectorName) {
+  if (sectorName === 'Unspecified' || !sectorName) {
+    return COLOR_UNSPECIFIED;
+  }
+  return SECTOR_COLOR_MAP[sectorName] || CATEGORICAL_PALETTE[0];
+}
+
 /**
  * Returns color for sector bar chart. 'Unspecified' is visually muted.
  * @param {string} sectorName
  * @returns {{ background: string, border: string }}
  */
 export function getSectorBarColor(sectorName) {
-  if (sectorName === 'Unspecified') {
+  if (sectorName === 'Unspecified' || !sectorName) {
     return {
       background: 'rgba(148, 163, 184, 0.45)', // Muted Slate
       border: '#94a3b8',
     };
   }
+  const color = getSectorColor(sectorName);
   return {
-    background: 'rgba(37, 99, 235, 0.85)',   // Sapphire Blue
-    border: '#1d4ed8',
+    background: color,
+    border: color,
   };
 }
 

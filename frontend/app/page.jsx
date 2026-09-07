@@ -10,6 +10,7 @@ import SectorBarChart from '../components/SectorBarChart';
 import RegionDonutChart from '../components/RegionDonutChart';
 import YearLineChart from '../components/YearLineChart';
 import TopTopicsChart from '../components/TopTopicsChart';
+import BubbleChart from '../components/BubbleChart';
 import ChartSkeleton from '../components/ChartSkeleton';
 
 /**
@@ -144,6 +145,9 @@ export default function DashboardPage() {
               <ChartSkeleton title="Geographic Distribution" />
               <ChartSkeleton title="Temporal Trends" />
               <ChartSkeleton title="Top Topics" />
+              <div className="lg:col-span-2">
+                <ChartSkeleton title="Strategic Multi-Metric Landscape (D3.js)" />
+              </div>
             </>
           ) : (
             <>
@@ -151,6 +155,9 @@ export default function DashboardPage() {
               <RegionDonutChart data={stats?.countByRegion || []} />
               <YearLineChart data={stats?.metricsByYear || []} />
               <TopTopicsChart data={stats?.topTopics || []} />
+              <div className="lg:col-span-2">
+                <BubbleChart data={stats?.bubblePoints || []} />
+              </div>
             </>
           )}
         </section>

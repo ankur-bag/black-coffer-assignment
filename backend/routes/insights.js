@@ -257,7 +257,13 @@ router.get('/stats', async (req, res) => {
                 intensity: 1,
                 likelihood: 1,
                 relevance: 1,
-                sector: 1,
+                sector: {
+                  $cond: [
+                    { $or: [{ $eq: ['$sector', ''] }, { $eq: ['$sector', null] }] },
+                    'Unspecified',
+                    '$sector',
+                  ],
+                },
               },
             },
           ],
