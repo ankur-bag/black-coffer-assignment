@@ -14,38 +14,18 @@ import TopTopicsChart from '../components/TopTopicsChart';
 import BubbleChart from '../components/BubbleChart';
 import ChartSkeleton from '../components/ChartSkeleton';
 
-// Typed window augmentation for development debug access without 'any' casts
-declare global {
-  interface Window {
-    setFilter?: (field: keyof FilterState, values: string[] | string) => void;
-    setFilters?: React.Dispatch<React.SetStateAction<FilterState>>;
-    resetFilters?: () => void;
-    getFiltersState?: () => FilterState;
-  }
-}
-
 /**
  * Main dashboard container component (Data & Orchestration Layer).
  * Coordinates filter state, initial filter options, and debounced stats querying.
  */
 export default function DashboardPage(): React.JSX.Element {
-  const { filters, setFilter, resetFilters, setAllFilters } = useDashboardFilters();
+  const { filters, setFilter, resetFilters } = useDashboardFilters();
 
   const [filterOptions, setFilterOptions] = useState<FilterOptions | null>(null);
   const [stats, setStats] = useState<StatsResponse | null>(null);
   const [loadingFilters, setLoadingFilters] = useState<boolean>(true);
   const [loadingStats, setLoadingStats] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
-  // TODO [Phase 5 / Cleanup]: Strip window debug hooks before final production submission
-  useEffect(() => {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
-      window.setFilter = setFilter;
-      window.setFilters = setAllFilters;
-      window.resetFilters = resetFilters;
-      window.getFiltersState = () => filters;
-    }
-  }, [filters, setFilter, setAllFilters, resetFilters]);
 
   // 1. Fetch available filter options on mount
   useEffect(() => {

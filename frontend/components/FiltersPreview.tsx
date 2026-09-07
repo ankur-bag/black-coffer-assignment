@@ -5,7 +5,7 @@
  * Interactive filter toolbar providing quick dimension toggles and filter state management.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { FilterOptions, FilterState } from '../lib/types';
 import ActiveFilterChips, { ActiveFilterChip } from './ActiveFilterChips';
 
@@ -17,6 +17,23 @@ export interface FiltersPreviewProps {
   loading?: boolean;
 }
 
+interface FilterFieldDef {
+  key: keyof FilterState;
+  label: string;
+}
+
+const FILTER_FIELDS: FilterFieldDef[] = [
+  { key: 'end_year', label: 'End Year' },
+  { key: 'topic', label: 'Topic' },
+  { key: 'sector', label: 'Sector' },
+  { key: 'region', label: 'Region' },
+  { key: 'pestle', label: 'PESTLE' },
+  { key: 'source', label: 'Source' },
+  { key: 'country', label: 'Country' },
+  { key: 'city', label: 'City' },
+  { key: 'swot', label: 'SWOT' },
+];
+
 export default function FiltersPreview({
   options,
   filters,
@@ -24,12 +41,6 @@ export default function FiltersPreview({
   resetFilters,
   loading = false,
 }: FiltersPreviewProps): React.JSX.Element {
-  const [showOptionsInspector, setShowOptionsInspector] = useState(false);
-
-  const isEnergySelected = filters.sector?.includes('Energy');
-  const isNaSelected = filters.region?.includes('Northern America');
-  const isUsaSelected = filters.country?.includes('United States of America');
-
   const chips: ActiveFilterChip[] = useMemo(() => {
     const list: ActiveFilterChip[] = [];
     (Object.entries(filters) as [keyof FilterState, string[]][]).forEach(([field, values]) => {
@@ -46,11 +57,10 @@ export default function FiltersPreview({
 
   const totalActiveCount = chips.length;
 
-  const handleToggle = (field: keyof FilterState, value: string) => {
+  const handleSelect = (field: keyof FilterState, value: string) => {
+    if (!value) return;
     const current = filters[field] || [];
-    if (current.includes(value)) {
-      setFilter(field, current.filter((v) => v !== value));
-    } else {
+    if (!current.includes(value)) {
       setFilter(field, [...current, value]);
     }
   };
@@ -68,7 +78,7 @@ export default function FiltersPreview({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[var(--color-border)]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-section-label">Interactive Filter Controls</span>
+            <span className="text-section-label">Interactive Dimension Filters</span>
             {totalActiveCount > 0 && (
               <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-[var(--color-accent-subtle)] text-[var(--color-accent)]">
                 {totalActiveCount} active
@@ -76,93 +86,73 @@ export default function FiltersPreview({
             )}
           </div>
           <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">
-            Test real-time aggregation reactivity by toggling benchmark dimensions
+            Filter telemetry across nine dimensions or click chart segments to drill down
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        {totalActiveCount > 0 && (
           <button
-            id="btn-toggle-energy"
+            id="btn-reset-filters"
             type="button"
-            onClick={() => handleToggle('sector', 'Energy')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150 cursor-pointer ${
-              isEnergySelected
-                ? 'bg-[var(--color-accent)] text-white shadow-xs'
-                : 'bg-[var(--color-bg-muted)] text-[var(--color-text-primary)] hover:bg-[var(--color-border)]'
-            }`}
+            onClick={resetFilters}
+            className="self-start sm:self-auto px-3 py-1.5 rounded-md text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 transition-colors cursor-pointer"
           >
-            {isEnergySelected ? '✓ Sector: Energy' : '+ Sector: Energy'}
+            Reset Filters
           </button>
-
-          <button
-            id="btn-toggle-na"
-            type="button"
-            onClick={() => handleToggle('region', 'Northern America')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150 cursor-pointer ${
-              isNaSelected
-                ? 'bg-[var(--color-accent)] text-white shadow-xs'
-                : 'bg-[var(--color-bg-muted)] text-[var(--color-text-primary)] hover:bg-[var(--color-border)]'
-            }`}
-          >
-            {isNaSelected ? '✓ Region: N. America' : '+ Region: N. America'}
-          </button>
-
-          <button
-            id="btn-toggle-usa"
-            type="button"
-            onClick={() => handleToggle('country', 'United States of America')}
-            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors duration-150 cursor-pointer ${
-              isUsaSelected
-                ? 'bg-[var(--color-accent)] text-white shadow-xs'
-                : 'bg-[var(--color-bg-muted)] text-[var(--color-text-primary)] hover:bg-[var(--color-border)]'
-            }`}
-          >
-            {isUsaSelected ? '✓ Country: USA' : '+ Country: USA'}
-          </button>
-
-          {totalActiveCount > 0 && (
-            <button
-              id="btn-reset-filters"
-              type="button"
-              onClick={resetFilters}
-              className="px-3 py-1.5 rounded-md text-xs font-medium text-rose-600 bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/30 dark:text-rose-400 border border-rose-200 dark:border-rose-900/50 transition-colors cursor-pointer"
-            >
-              Reset Filters
-            </button>
-          )}
-
-          <button
-            type="button"
-            onClick={() => setShowOptionsInspector(!showOptionsInspector)}
-            className="px-2.5 py-1.5 rounded-md text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-muted)] transition-colors cursor-pointer"
-          >
-            {showOptionsInspector ? 'Hide Schema Options' : 'Inspect Filter Schema'}
-          </button>
-        </div>
+        )}
       </div>
 
-      {/* Active filters chips component */}
-      <ActiveFilterChips chips={chips} onRemove={handleRemoveChip} onClearAll={resetFilters} />
+      {/* 9-dimension filter dropdown grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-4">
+        {FILTER_FIELDS.map(({ key, label }) => {
+          const fieldOptions = options?.[key] || [];
+          const hasOptions = fieldOptions.length > 0;
+          const activeCount = filters[key]?.length || 0;
 
-      {/* Collapsible raw options inspector */}
-      {showOptionsInspector && (
-        <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium text-[var(--color-text-secondary)]">
-              Raw Available Filter Options per Schema Field:
-            </span>
-            <span className="text-metadata">
-              {loading ? 'Querying...' : `${Object.keys(options || {}).length} fields available`}
-            </span>
-          </div>
-          <pre
-            id="raw-filter-options"
-            className="p-3 bg-[var(--color-bg-canvas)] border border-[var(--color-border)] rounded-md text-xs overflow-x-auto max-h-[220px] text-[var(--color-text-secondary)]"
-          >
-            {options ? JSON.stringify(options, null, 2) : 'Loading schema options...'}
-          </pre>
-        </div>
-      )}
+          return (
+            <div key={key} className="flex flex-col gap-1">
+              <label
+                htmlFor={`filter-select-${key}`}
+                className="text-[11px] font-semibold text-[var(--color-text-secondary)] uppercase tracking-wider truncate"
+              >
+                {label}
+                {activeCount > 0 && (
+                  <span className="ml-1 text-[var(--color-accent)] font-bold">({activeCount})</span>
+                )}
+              </label>
+              <select
+                id={`filter-select-${key}`}
+                value=""
+                disabled={loading || !hasOptions}
+                onChange={(e) => {
+                  handleSelect(key, e.target.value);
+                }}
+                className={`text-xs px-2.5 py-1.5 rounded-md border bg-[var(--color-bg-canvas)] text-[var(--color-text-primary)] transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--color-accent)] cursor-pointer truncate ${
+                  hasOptions
+                    ? 'border-[var(--color-border)] hover:border-[var(--color-accent)]/50'
+                    : 'border-[var(--color-border)] opacity-60 cursor-not-allowed bg-[var(--color-bg-muted)]'
+                }`}
+              >
+                <option value="">
+                  {loading
+                    ? 'Loading...'
+                    : hasOptions
+                    ? `All ${label}s`
+                    : `No ${label} data`}
+                </option>
+                {fieldOptions.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Active filter chips */}
+      <ActiveFilterChips chips={chips} onRemove={handleRemoveChip} onClearAll={resetFilters} />
     </section>
   );
 }
