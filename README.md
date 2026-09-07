@@ -42,6 +42,11 @@ A production-grade full-stack analytics dashboard visualizing global trends, geo
    - In the source data, `"World"` (131 records) and `"world"` (1 record) represented the identical real-world entity. During database seeding, all case variants were normalized to the canonical `"World"`.
    - Trailing whitespace across 16 source records (e.g. `"Atlantic Council "`, `"CNBC "`, `"UNESCO "`) was trimmed, consolidating duplicates.
 
+4. **Synthetic `"Unspecified"` Filter Mapping**:
+   - The label `"Unspecified"` is an application-level synthetic bucket chosen to represent unclassified records (blank string `""` or `null`) across visualizations.
+   - The query parsing layer (`buildMongoFilter`) translates input filters containing `"Unspecified"` to `{ $in: [..., '', null] }` to enable drill-down into unclassified records.
+   - *Note on extensibility*: If an external dataset is ever ingested that features a literal category value genuinely named `"Unspecified"`, this query translation would treat it as the blank bucket.
+
 ---
 
 ##  Getting Started

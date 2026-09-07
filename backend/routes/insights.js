@@ -36,7 +36,13 @@ const buildMongoFilter = (query) => {
         values = [values];
       }
 
-      // Support drill-down into unclassified records labeled 'Unspecified' in charts
+      // Support drill-down into unclassified records labeled 'Unspecified' in charts.
+      // NOTE: 'Unspecified' is a synthetic bucket label created by aggregation stages for blank/null values.
+      // If a dataset later contains a literal category string named "Unspecified", this mapping would treat
+      // it as a request for empty records.
+      // - regularValues: any genuine non-'Unspecified' category strings requested (e.g. ['Energy'])
+      // - If only 'Unspecified' was requested: regularValues is [], resulting in { $in: ['', null] }
+      // - If multi-value requested (e.g. ['Energy', 'Unspecified']): matches 'Energy', '', or null
       const hasUnspecified = values.includes('Unspecified');
       const regularValues = values.filter((v) => v !== 'Unspecified');
 
