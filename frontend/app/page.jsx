@@ -20,9 +20,9 @@ export default function DashboardPage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [error, setError] = useState(null);
 
-  // Expose filter setters to window for rapid browser console testing
+  // TODO [Phase 5 / Cleanup]: Strip window debug hooks before final production submission
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
       window.setFilter = setFilter;
       window.setFilters = setAllFilters;
       window.resetFilters = resetFilters;
