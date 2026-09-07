@@ -4,6 +4,12 @@ A production-grade full-stack analytics dashboard visualizing global trends, geo
 
 ---
 
+## Live Deployment
+
+- **Frontend (Vercel)**: [https://black-coffer-ankur.vercel.app](https://black-coffer-ankur.vercel.app)
+- **Backend API (Render)**: [https://black-coffer-assignment.onrender.com](https://black-coffer-assignment.onrender.com)
+- **API Health Check**: [https://black-coffer-assignment.onrender.com/](https://black-coffer-assignment.onrender.com/)
+
 ## Features
 
 - **Interactive 9-Dimension Filtering**: Filter across End Year, Topic, Sector, Region, PESTLE, Source, Country, City, and SWOT.
@@ -67,10 +73,13 @@ npm install
 npm run dev
 ```
 
-### 4. Port & Proxy Configuration
+### 4. Environment & API Configuration
 - **Backend Port**: `http://localhost:5000`
 - **Frontend Port**: `http://localhost:3000`
-- **Next.js Dev Proxy**: All requests to `/api/:path*` on the Next.js dev server are proxied to `http://localhost:5000/api/:path*` via `next.config.js` rewrites. No manual CORS setup or hardcoded backend URLs are required.
+- **API URL Configuration**: The frontend communicates directly with the Express API using `NEXT_PUBLIC_API_URL`:
+  - **Local Development**: Configured in `frontend/.env.local` as `NEXT_PUBLIC_API_URL=http://localhost:5000` (defaults to `http://localhost:5000` if omitted).
+  - **Production (Vercel)**: Configured via Vercel Environment Variables as `NEXT_PUBLIC_API_URL=https://black-coffer-assignment.onrender.com`.
+  - **CORS**: The backend explicitly allows requests from `http://localhost:3000`, `https://black-coffer-ankur.vercel.app`, and Vercel preview environments (`*.vercel.app`).
 
 ---
 
