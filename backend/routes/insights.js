@@ -125,10 +125,20 @@ router.get('/stats', async (req, res) => {
             },
           ],
           intensityBySector: [
-            { $match: { sector: { $ne: '' } } },
+            {
+              $addFields: {
+                sectorName: {
+                  $cond: [
+                    { $or: [{ $eq: ['$sector', ''] }, { $eq: ['$sector', null] }] },
+                    'Unspecified',
+                    '$sector',
+                  ],
+                },
+              },
+            },
             {
               $group: {
-                _id: '$sector',
+                _id: '$sectorName',
                 avgIntensity: { $avg: '$intensity' },
                 count: { $sum: 1 },
               },
