@@ -1,7 +1,9 @@
 import { FilterOptions, FilterState, StatsResponse } from './types';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export async function getFilters(): Promise<FilterOptions> {
-  const url = '/api/insights/filters';
+  const url = `${API_URL}/api/insights/filters`;
   try {
     const res = await fetch(url);
     if (!res.ok) {
@@ -37,7 +39,7 @@ export async function getStats(filters: Partial<FilterState> = {}): Promise<Stat
   }
 
   const queryString = params.toString();
-  const url = queryString ? `/api/insights/stats?${queryString}` : '/api/insights/stats';
+  const url = queryString ? `${API_URL}/api/insights/stats?${queryString}` : `${API_URL}/api/insights/stats`;
 
   try {
     const res = await fetch(url);

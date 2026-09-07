@@ -11,9 +11,26 @@ dotenv.config();
 
 const app = express();
 
-// Permissive CORS allows both direct browser calls and server-side Next.js proxy rewrites
-// from deployed frontend (e.g. https://black-coffer-ankur.vercel.app) or local dev.
-app.use(cors());
+// Allowed origins for cross-origin browser requests from local dev and production Vercel frontend.
+// Supports localhost:3000, production Vercel URL, and any preview deployment (*.vercel.app).
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://black-coffer-ankur.vercel.app',
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. curl, server-to-server, health pings)
+      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+        callback(null, true);
+      } else {
+        callback(new Error(`Origin ${origin} not allowed by CORS`));
+      }
+    },
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Mount API routes
