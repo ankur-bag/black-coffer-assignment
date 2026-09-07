@@ -1,10 +1,5 @@
 import React from 'react';
 
-/**
- * @file ChartSkeleton.tsx
- * Accessible loading placeholder for dashboard chart cards.
- */
-
 export interface ChartSkeletonProps {
   title: string;
 }

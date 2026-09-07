@@ -3,11 +3,6 @@
 import React from 'react';
 import { FilterState } from '../lib/types';
 
-/**
- * @file ActiveFilterChips.tsx
- * Modular presentation component displaying active filter chips with individual remove buttons.
- */
-
 export interface ActiveFilterChip {
   field: keyof FilterState;
   value: string;

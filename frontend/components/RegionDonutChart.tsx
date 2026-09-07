@@ -14,6 +14,7 @@ import {
 import { Doughnut } from 'react-chartjs-2';
 import { RegionStat } from '../lib/types';
 import { getRegionColors } from '../lib/chartColors';
+import { useTheme } from '../hooks/useTheme';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -26,6 +27,10 @@ export default function RegionDonutChart({
   data = [],
   onSegmentClick,
 }: RegionDonutChartProps): React.JSX.Element {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const textColor = isDark ? '#c7c2b8' : '#475569';
+
   const top10 = data.slice(0, 10);
   const remainder = data.slice(10);
   const otherCount = remainder.reduce((acc, curr) => acc + curr.count, 0);
@@ -81,14 +86,14 @@ export default function RegionDonutChart({
           font: {
             size: 11,
           },
-          color: '#475569',
+          color: textColor,
         },
       },
       tooltip: {
-        backgroundColor: '#0f172a',
-        titleColor: '#f8fafc',
-        bodyColor: '#e2e8f0',
-        borderColor: '#334155',
+        backgroundColor: isDark ? '#1f2126' : '#0f172a',
+        titleColor: isDark ? '#f5f1e8' : '#f8fafc',
+        bodyColor: isDark ? '#c7c2b8' : '#e2e8f0',
+        borderColor: isDark ? '#2e3138' : '#334155',
         borderWidth: 1,
         padding: 10,
         cornerRadius: 6,

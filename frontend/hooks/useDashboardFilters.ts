@@ -25,19 +25,12 @@ export interface UseDashboardFiltersReturn {
   setAllFilters: React.Dispatch<React.SetStateAction<FilterState>>;
 }
 
-/**
- * Custom hook for managing pure dashboard filter state.
- * Contains zero network/fetching logic, making it independently testable and reusable.
- */
 export function useDashboardFilters(initialState: Partial<FilterState> = {}): UseDashboardFiltersReturn {
   const [filters, setFilters] = useState<FilterState>(() => ({
     ...INITIAL_FILTERS,
     ...initialState,
   }));
 
-  /**
-   * Updates a single filter field. Normalizes values to an array of strings.
-   */
   const setFilter = useCallback((field: keyof FilterState, values: string[] | string) => {
     setFilters((prev) => {
       let normalizedValues: string[] = [];
@@ -54,9 +47,6 @@ export function useDashboardFilters(initialState: Partial<FilterState> = {}): Us
     });
   }, []);
 
-  /**
-   * Resets all filter fields back to initial empty arrays.
-   */
   const resetFilters = useCallback(() => {
     setFilters(INITIAL_FILTERS);
   }, []);

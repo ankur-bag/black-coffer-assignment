@@ -36,13 +36,8 @@ const buildMongoFilter = (query) => {
         values = [values];
       }
 
-      // Support drill-down into unclassified records labeled 'Unspecified' in charts.
-      // NOTE: 'Unspecified' is a synthetic bucket label created by aggregation stages for blank/null values.
-      // If a dataset later contains a literal category string named "Unspecified", this mapping would treat
-      // it as a request for empty records.
-      // - regularValues: any genuine non-'Unspecified' category strings requested (e.g. ['Energy'])
-      // - If only 'Unspecified' was requested: regularValues is [], resulting in { $in: ['', null] }
-      // - If multi-value requested (e.g. ['Energy', 'Unspecified']): matches 'Energy', '', or null
+      // Map synthetic 'Unspecified' filter to match blank or null fields.
+      // If a dataset later contains a literal "Unspecified" category, this would treat it as blank.
       const hasUnspecified = values.includes('Unspecified');
       const regularValues = values.filter((v) => v !== 'Unspecified');
 
@@ -137,6 +132,7 @@ router.get('/stats', async (req, res) => {
               },
             },
           ],
+          // Group blank categories into 'Unspecified' to maintain total record accounting across charts.
           intensityBySector: [
             {
               $addFields: {
@@ -262,8 +258,7 @@ router.get('/stats', async (req, res) => {
               },
             },
           ],
-          // Data honesty: exclude ~38 records with missing source scores (coerced to 0) from the bubble chart
-          // specifically, since plotting a coerced 0 as a real coordinate would misrepresent missing data as a genuine low score.
+          // Exclude records with missing scores (coerced to 0) to avoid plotting false minimums at the origin.
           bubblePoints: [
             {
               $match: {

@@ -14,10 +14,6 @@ import TopTopicsChart from '../components/TopTopicsChart';
 import BubbleChart from '../components/BubbleChart';
 import ChartSkeleton from '../components/ChartSkeleton';
 
-/**
- * Main dashboard container component (Data & Orchestration Layer).
- * Coordinates filter state, initial filter options, and debounced stats querying.
- */
 export default function DashboardPage(): React.JSX.Element {
   const { filters, setFilter, resetFilters } = useDashboardFilters();
 
@@ -27,7 +23,6 @@ export default function DashboardPage(): React.JSX.Element {
   const [loadingStats, setLoadingStats] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 1. Fetch available filter options on mount
   useEffect(() => {
     let isMounted = true;
     setLoadingFilters(true);
@@ -53,7 +48,6 @@ export default function DashboardPage(): React.JSX.Element {
     };
   }, []);
 
-  // 2. Debounced stats fetch (200ms) whenever filters change
   useEffect(() => {
     setLoadingStats(true);
     const debounceTimer = setTimeout(() => {
@@ -79,13 +73,11 @@ export default function DashboardPage(): React.JSX.Element {
 
   return (
     <main className="w-full max-w-[var(--max-width-container)] mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* 1. Page Header */}
       <DashboardHeader
         matchedCount={stats?.matchedCount ?? 0}
         loading={loadingStats}
       />
 
-      {/* 2. Interactive Filter Bar */}
       <FiltersPreview
         options={filterOptions}
         filters={filters}
@@ -94,14 +86,12 @@ export default function DashboardPage(): React.JSX.Element {
         loading={loadingFilters}
       />
 
-      {/* Error alert if API fails */}
       {error && (
-        <div className="mb-6 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+        <div className="mb-6 p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 text-xs">
           <strong>Pipeline Error:</strong> {error}
         </div>
       )}
 
-      {/* 3. Executive KPI Indicators */}
       <KpiCards
         matchedCount={stats?.matchedCount ?? 0}
         avgIntensity={stats?.avgIntensity ?? 0}
@@ -110,7 +100,6 @@ export default function DashboardPage(): React.JSX.Element {
         loading={loadingStats}
       />
 
-      {/* 4. Visualizations Grid or Empty State */}
       {isEmpty ? (
         <section className="p-12 text-center bg-[var(--color-bg-surface)] border border-[var(--color-border)] rounded-lg shadow-xs my-8">
           <div className="w-12 h-12 rounded-full bg-[var(--color-bg-muted)] text-[var(--color-text-secondary)] mx-auto flex items-center justify-center mb-3 text-lg">

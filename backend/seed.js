@@ -17,7 +17,7 @@ const seedData = async () => {
     const records = JSON.parse(rawData);
     console.log(`Read ${records.length} records from ${dataPath}`);
 
-    // Data hygiene normalization: strip whitespace across all string fields and normalize casing inconsistencies (e.g., "world" -> "World") in source records
+    // Trim whitespace and normalize casing inconsistencies in source data (e.g. "world" -> "World").
     const cleanedRecords = records.map((record) => {
       const cleaned = {};
       for (const [key, value] of Object.entries(record)) {
@@ -29,11 +29,9 @@ const seedData = async () => {
       return cleaned;
     });
 
-    // Idempotent seeding: clear existing collection before inserting
     const deleteResult = await Insight.deleteMany({});
     console.log(`Cleared existing records (deleted: ${deleteResult.deletedCount || 0}).`);
 
-    // Insert normalized records
     const inserted = await Insight.insertMany(cleanedRecords);
     console.log(`Successfully inserted ${inserted.length} records into the database.`);
 

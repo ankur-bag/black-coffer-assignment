@@ -1,9 +1,5 @@
 import React from 'react';
-
-/**
- * @file DashboardHeader.tsx
- * Presentational header component for the analytics dashboard.
- */
+import ThemeToggle from './ThemeToggle';
 
 export interface DashboardHeaderProps {
   matchedCount?: number;
@@ -16,9 +12,6 @@ export default function DashboardHeader({ matchedCount = 0, loading = false }: D
       <div>
         <div className="flex items-center gap-3">
           <h1 className="text-page-title">Global Insights & Risk Intelligence</h1>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[var(--color-accent-subtle)] text-[var(--color-accent)] border border-[var(--color-accent)]/20">
-            Phase 5: Full Suite Active
-          </span>
         </div>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
           Interactive intelligence telemetry across sectors, regions, and strategic pestle metrics.
@@ -26,6 +19,8 @@ export default function DashboardHeader({ matchedCount = 0, loading = false }: D
       </div>
 
       <div className="flex items-center gap-3 self-start md:self-auto">
+        <ThemeToggle />
+
         <div className="px-3.5 py-1.5 rounded-md bg-[var(--color-bg-surface)] border border-[var(--color-border)] shadow-xs flex items-center gap-2 text-xs font-medium">
           <span className={`w-2 h-2 rounded-full ${loading ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`} />
           <span className="text-[var(--color-text-secondary)]">Database Telemetry:</span>

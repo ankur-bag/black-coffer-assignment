@@ -11,7 +11,8 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
+// Permissive CORS allows both direct browser calls and server-side Next.js proxy rewrites
+// from deployed frontend (e.g. https://black-coffer-ankur.vercel.app) or local dev.
 app.use(cors());
 app.use(express.json());
 

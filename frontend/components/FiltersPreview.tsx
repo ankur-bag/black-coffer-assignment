@@ -1,10 +1,5 @@
 'use client';
 
-/**
- * @file FiltersPreview.tsx
- * Interactive filter toolbar providing quick dimension toggles and filter state management.
- */
-
 import React, { useMemo } from 'react';
 import { FilterOptions, FilterState } from '../lib/types';
 import ActiveFilterChips, { ActiveFilterChip } from './ActiveFilterChips';

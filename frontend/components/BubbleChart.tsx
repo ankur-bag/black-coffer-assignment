@@ -1,15 +1,10 @@
 'use client';
 
-/**
- * @file BubbleChart.tsx
- * Bespoke D3.js Multi-Metric Visualization (Intensity vs Likelihood vs Relevance by Sector).
- * Fully type-safe using @types/d3 with explicit D3 selections, SVG refs, and custom tooltip state.
- */
-
 import React, { useRef, useEffect, useState, useMemo } from 'react';
 import * as d3 from 'd3';
 import { BubblePoint } from '../lib/types';
 import { getSectorColor } from '../lib/chartColors';
+import { useTheme } from '../hooks/useTheme';
 
 export interface BubbleChartProps {
   data?: BubblePoint[];
@@ -28,6 +23,9 @@ interface ChartDimensions {
 }
 
 export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.Element {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const [dimensions, setDimensions] = useState<ChartDimensions>({ width: 0, height: 460 });
@@ -39,7 +37,6 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
     point: null,
   });
 
-  // Observe container resize for true responsive SVG viewBox
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -58,7 +55,6 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
     return () => observer.disconnect();
   }, []);
 
-  // Compute unique sectors present in current data for the dynamic compact legend
   const activeSectors: string[] = useMemo(() => {
     const set = new Set<string>();
     for (const d of data) {
@@ -71,7 +67,6 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
     });
   }, [data]);
 
-  // Main D3 rendering effect
   useEffect(() => {
     if (!svgRef.current || dimensions.width <= 0) return;
 
@@ -82,7 +77,7 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
 
     const svg: d3.Selection<SVGSVGElement, unknown, null, undefined> = d3.select(svgRef.current);
 
-    // 1. Mandatory cleanup: remove all previous SVG contents to prevent ghosting on filter updates
+    // Clear previous SVG contents on resize or re-render
     svg.selectAll('*').remove();
 
     if (!data || data.length === 0) {
@@ -97,7 +92,6 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
       return;
     }
 
-    // 2. Dynamic domains padded by ~10% for natural spread
     const xMin = d3.min(data, (d: BubblePoint) => d.likelihood) ?? 0;
     const xMax = d3.max(data, (d: BubblePoint) => d.likelihood) ?? 5;
     const xPad = (xMax - xMin) * 0.1 || 0.5;
@@ -118,14 +112,13 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
       .range([height - margin.bottom, margin.top])
       .nice();
 
-    // 3. Circle radius scaled by area (scaleSqrt) of relevance
+    // Scale bubble radius by square root so perceived area is proportional to relevance
     const rMax = d3.max(data, (d: BubblePoint) => d.relevance) ?? 5;
     const rScale = d3
       .scaleSqrt()
       .domain([0, Math.max(1, rMax)])
       .range([4, 15]);
 
-    // 4. Gridlines
     const gGrid = svg.append('g').attr('class', 'gridlines');
 
     // Horizontal gridlines
@@ -138,7 +131,7 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
       .attr('x2', width - margin.right)
       .attr('y1', (d: number) => yScale(d))
       .attr('y2', (d: number) => yScale(d))
-      .attr('stroke', 'rgba(226, 232, 240, 0.6)')
+      .attr('stroke', isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.8)')
       .attr('stroke-dasharray', '3 3');
 
     // Vertical gridlines
@@ -151,55 +144,53 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
       .attr('x2', (d: number) => xScale(d))
       .attr('y1', margin.top)
       .attr('y2', height - margin.bottom)
-      .attr('stroke', 'rgba(226, 232, 240, 0.6)')
+      .attr('stroke', isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.8)')
       .attr('stroke-dasharray', '3 3');
 
-    // 5. X Axis
     const xAxis = d3.axisBottom(xScale).ticks(width < 500 ? 5 : 8).tickSizeOuter(0);
     const gX = svg
       .append('g')
       .attr('transform', `translate(0, ${height - margin.bottom})`)
       .call(xAxis);
 
-    gX.selectAll('.domain').attr('stroke', '#cbd5e1');
-    gX.selectAll('.tick line').attr('stroke', '#cbd5e1');
-    gX.selectAll('.tick text').attr('fill', '#64748b').attr('font-size', '11px');
+    const axisLineColor = isDark ? '#3a3e47' : '#cbd5e1';
+    const axisTextColor = isDark ? '#c7c2b8' : '#64748b';
 
-    // X Axis Label
+    gX.selectAll('.domain').attr('stroke', axisLineColor);
+    gX.selectAll('.tick line').attr('stroke', axisLineColor);
+    gX.selectAll('.tick text').attr('fill', axisTextColor).attr('font-size', '11px');
+
     svg
       .append('text')
       .attr('x', margin.left + innerWidth / 2)
       .attr('y', height - 12)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#64748b')
+      .attr('fill', axisTextColor)
       .attr('font-size', '11px')
       .attr('font-weight', '500')
       .text('Likelihood Score →');
 
-    // 6. Y Axis
     const yAxis = d3.axisLeft(yScale).ticks(6).tickSizeOuter(0);
     const gY = svg
       .append('g')
       .attr('transform', `translate(${margin.left}, 0)`)
       .call(yAxis);
 
-    gY.selectAll('.domain').attr('stroke', '#cbd5e1');
-    gY.selectAll('.tick line').attr('stroke', '#cbd5e1');
-    gY.selectAll('.tick text').attr('fill', '#64748b').attr('font-size', '11px');
+    gY.selectAll('.domain').attr('stroke', axisLineColor);
+    gY.selectAll('.tick line').attr('stroke', axisLineColor);
+    gY.selectAll('.tick text').attr('fill', axisTextColor).attr('font-size', '11px');
 
-    // Y Axis Label
     svg
       .append('text')
       .attr('transform', 'rotate(-90)')
       .attr('x', -(margin.top + innerHeight / 2))
       .attr('y', 16)
       .attr('text-anchor', 'middle')
-      .attr('fill', '#64748b')
+      .attr('fill', axisTextColor)
       .attr('font-size', '11px')
       .attr('font-weight', '500')
       .text('↑ Intensity Score');
 
-    // 7. Bubbles group
     const gBubbles = svg.append('g').attr('class', 'bubbles');
 
     gBubbles
@@ -257,7 +248,7 @@ export default function BubbleChart({ data = [] }: BubbleChartProps): React.JSX.
 
         setTooltip((prev: TooltipState) => ({ ...prev, visible: false }));
       });
-  }, [data, dimensions]);
+  }, [data, dimensions, isDark]);
 
   return (
     <div

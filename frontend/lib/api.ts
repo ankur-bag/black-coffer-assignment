@@ -1,13 +1,5 @@
-/**
- * @file api.ts
- * Type-safe API client for Blackcoffer Insights telemetry and aggregations.
- */
-
 import { FilterOptions, FilterState, StatsResponse } from './types';
 
-/**
- * Fetches available filter distinct values.
- */
 export async function getFilters(): Promise<FilterOptions> {
   const url = '/api/insights/filters';
   try {

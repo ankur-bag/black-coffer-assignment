@@ -1,10 +1,5 @@
 import React from 'react';
 
-/**
- * @file KpiCards.tsx
- * Executive metrics row displaying high-level statistical indicators with transition animations.
- */
-
 export interface KpiCardsProps {
   matchedCount?: number;
   avgIntensity?: number;

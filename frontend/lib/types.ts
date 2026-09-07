@@ -1,8 +1,3 @@
-/**
- * @file types.ts
- * Shared domain models, filter interfaces, and API payload contracts for Blackcoffer Insights.
- */
-
 export interface Insight {
   _id?: string;
   end_year: string;

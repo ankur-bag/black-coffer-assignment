@@ -15,6 +15,7 @@ import {
 import { Line } from 'react-chartjs-2';
 import { YearStat } from '../lib/types';
 import { ACCENT_SECONDARY, ACCENT_TERTIARY } from '../lib/chartColors';
+import { useTheme } from '../hooks/useTheme';
 
 ChartJS.register(
   CategoryScale,
@@ -30,6 +31,11 @@ export interface YearLineChartProps {
 }
 
 export default function YearLineChart({ data = [] }: YearLineChartProps): React.JSX.Element {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const textColor = isDark ? '#c7c2b8' : '#475569';
+  const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(226, 232, 240, 0.8)';
+
   const labels = data.map((d) => d.year);
   const likelihoodValues = data.map((d) => d.avgLikelihood);
   const relevanceValues = data.map((d) => d.avgRelevance);
@@ -72,14 +78,14 @@ export default function YearLineChart({ data = [] }: YearLineChartProps): React.
           usePointStyle: true,
           pointStyle: 'circle',
           font: { size: 11 },
-          color: '#475569',
+          color: textColor,
         },
       },
       tooltip: {
-        backgroundColor: '#0f172a',
-        titleColor: '#f8fafc',
-        bodyColor: '#e2e8f0',
-        borderColor: '#334155',
+        backgroundColor: isDark ? '#1f2126' : '#0f172a',
+        titleColor: isDark ? '#f5f1e8' : '#f8fafc',
+        bodyColor: isDark ? '#c7c2b8' : '#e2e8f0',
+        borderColor: isDark ? '#2e3138' : '#334155',
         borderWidth: 1,
         padding: 10,
         cornerRadius: 6,
@@ -95,10 +101,10 @@ export default function YearLineChart({ data = [] }: YearLineChartProps): React.
     scales: {
       x: {
         grid: {
-          color: 'rgba(226, 232, 240, 0.5)',
+          color: gridColor,
         },
         ticks: {
-          color: '#64748b',
+          color: textColor,
           font: { size: 10 },
           maxRotation: 45,
           minRotation: 0,
@@ -106,16 +112,16 @@ export default function YearLineChart({ data = [] }: YearLineChartProps): React.
       },
       y: {
         grid: {
-          color: 'rgba(226, 232, 240, 0.6)',
+          color: gridColor,
         },
         ticks: {
-          color: '#64748b',
+          color: textColor,
           font: { size: 11 },
         },
         title: {
           display: true,
           text: 'Scale (0 - 5)',
-          color: '#64748b',
+          color: textColor,
           font: { size: 11, weight: 500 },
         },
       },
