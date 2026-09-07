@@ -22,6 +22,12 @@ export default function DashboardPage(): React.JSX.Element {
   const [loadingFilters, setLoadingFilters] = useState<boolean>(true);
   const [loadingStats, setLoadingStats] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryTrigger, setRetryTrigger] = useState<number>(0);
+
+  const handleRetry = () => {
+    setError(null);
+    setRetryTrigger((prev) => prev + 1);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -46,7 +52,7 @@ export default function DashboardPage(): React.JSX.Element {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [retryTrigger]);
 
   useEffect(() => {
     setLoadingStats(true);
@@ -67,7 +73,7 @@ export default function DashboardPage(): React.JSX.Element {
     return () => {
       clearTimeout(debounceTimer);
     };
-  }, [filters]);
+  }, [filters, retryTrigger]);
 
   const isEmpty = stats !== null && stats.matchedCount === 0;
 
@@ -87,8 +93,40 @@ export default function DashboardPage(): React.JSX.Element {
       />
 
       {error && (
-        <div className="mb-6 p-4 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-700 dark:text-rose-400 text-xs">
-          <strong>Pipeline Error:</strong> {error}
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-6 p-4 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800/70 text-red-900 dark:text-red-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+        >
+          <div className="flex items-start gap-3">
+            <svg
+              className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                clipRule="evenodd"
+              />
+            </svg>
+            <div>
+              <h3 className="text-xs font-bold text-red-950 dark:text-red-100 uppercase tracking-wide">
+                API Pipeline Error
+              </h3>
+              <p className="text-xs text-red-800 dark:text-red-300 mt-0.5 leading-relaxed font-normal">
+                {error}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={handleRetry}
+            className="self-start sm:self-auto px-3.5 py-1.5 rounded-md text-xs font-semibold bg-red-600 hover:bg-red-700 text-white dark:bg-red-800 dark:hover:bg-red-700 transition-colors shadow-xs cursor-pointer shrink-0"
+          >
+            Retry Connection
+          </button>
         </div>
       )}
 
